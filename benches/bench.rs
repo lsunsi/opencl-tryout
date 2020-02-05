@@ -3,6 +3,7 @@
 
 use criterion::{black_box, Criterion};
 use criterion_macro::criterion;
+use ocl::ProQue;
 use opencl_tryout::{cpu, gpu};
 
 fn input() -> (Vec<f32>, (f32, f32)) {
@@ -22,7 +23,13 @@ fn bench_cpu(c: &mut Criterion) {
 #[criterion]
 fn bench_gpu(c: &mut Criterion) {
     let (wealths, portfolio) = input();
+    let pro_que = ProQue::builder()
+        .src(gpu::SRC)
+        .dims(wealths.len())
+        .build()
+        .unwrap();
+
     c.bench_function("Bench-GPU", |b| {
-        b.iter(|| gpu::calculate(black_box(&wealths), black_box(portfolio)))
+        b.iter(|| gpu::calculate(black_box(&wealths), black_box(portfolio), &pro_que))
     });
 }

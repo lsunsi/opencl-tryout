@@ -1,7 +1,6 @@
-use ocl::enums::PlatformInfo;
-use ocl::{Device, Platform, ProQue};
+use ocl::ProQue;
 
-const SRC: &str = r#"
+pub const SRC: &str = r#"
     __kernel void add(__constant float* wealths, __global float* buffer, float ret, float vol) {
         uint idx = get_global_id(0);
         float prev_wealth = wealths[idx / 99];
@@ -11,20 +10,7 @@ const SRC: &str = r#"
     }
 "#;
 
-pub fn calculate(wealths: &[f32], (ret, vol): (f32, f32)) -> Vec<f32> {
-    let platforms = Platform::list();
-    assert!(platforms.len() == 1);
-    let devices = Device::list_all(platforms[0]).unwrap();
-    for device in devices {
-        println!("{:?}", device.name());
-    }
-
-    let pro_que = ProQue::builder()
-        .src(SRC)
-        .dims(wealths.len() * wealths.len())
-        .build()
-        .unwrap();
-
+pub fn calculate(wealths: &[f32], (ret, vol): (f32, f32), pro_que: &ProQue) -> Vec<f32> {
     let wealths_buffer = pro_que.create_buffer::<f32>().unwrap();
     wealths_buffer.write(wealths).enq().unwrap();
 
