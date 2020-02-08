@@ -1,6 +1,6 @@
 use ocl::ProQue;
 
-pub const SRC: &str = r#"
+const SRC: &str = r#"
     __kernel void add(__constant float* wealths, __global float* buffer, float ret, float vol) {
         uint idx = get_global_id(0);
         float prev_wealth = wealths[idx / 99];
@@ -9,6 +9,14 @@ pub const SRC: &str = r#"
         buffer[idx] = 1.0 / sqrt(2.0 * M_PI) * exp(-a * a / 2.0);
     }
 "#;
+
+pub fn setup(wealths_len: usize) -> ProQue {
+    ProQue::builder()
+        .src(SRC)
+        .dims(wealths_len * wealths_len)
+        .build()
+        .unwrap()
+}
 
 pub fn calculate(wealths: &[f32], (ret, vol): (f32, f32), pro_que: &ProQue) -> Vec<f32> {
     let wealths_buffer = pro_que.create_buffer::<f32>().unwrap();
